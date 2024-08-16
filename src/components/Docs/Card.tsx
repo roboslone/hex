@@ -29,8 +29,7 @@ export const Card: Component<P> = props => {
 
     const handleClick = (event: MouseEvent) => {
         event.stopPropagation()
-        console.info("card click", event.shiftKey)
-        putTopic(props.id, event.shiftKey)
+        putTopic(props.id)
     }
 
     return (
@@ -50,6 +49,7 @@ export const Card: Component<P> = props => {
                                 <ButtonWrapper 
                                     shortcut={Shortcuts.Escape}
                                     onInvoke={() => popTopic(props.id)}
+                                    compact
                                 >
                                     <VsChromeClose color="var(--color-gold)" />
                                 </ButtonWrapper>
@@ -65,11 +65,13 @@ export const Card: Component<P> = props => {
                             {props.index === 0 && data?.related?.length && data.related.length > 0 && (
                                 <>
                                     <h3>Related</h3>
-                                    <For each={data?.related}>
-                                        {id => (
-                                            <Reference id={id} />
-                                        )}
-                                    </For>
+                                    <div style={{display: "flex", gap: "6px", "flex-direction": "column"}}>
+                                        <For each={data?.related}>
+                                            {(id, index) => (
+                                                <Reference id={id} serialIndex={index()} />
+                                            )}
+                                        </For>
+                                    </div>
                                 </>
                             )}
                         </div>

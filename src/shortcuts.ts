@@ -1,6 +1,13 @@
+type Matcher = (e: KeyboardEvent) => boolean
+
 export type KeyboardShortcut = {
     label: string,
-    match: (e: KeyboardEvent) => boolean,
+    match: Matcher,
+}
+
+const Noop: KeyboardShortcut = {
+    label: "",
+    match: () => false,
 }
 
 export const Shortcuts = {
@@ -16,4 +23,17 @@ export const Shortcuts = {
         label: "⎋",
         match: (e: KeyboardEvent) => e.key === "Escape",
     },
+}
+
+export const getSerialShortcut = (index?: number): KeyboardShortcut => {
+    if (index === undefined) {
+        return Noop
+    }
+
+    return {
+        label: `${index + 1}`,
+        match: (e: KeyboardEvent) => {
+            return !e.shiftKey && !e.metaKey && !e.ctrlKey && e.key === `${index + 1}`
+        },
+    }
 }

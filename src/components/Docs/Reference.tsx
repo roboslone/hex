@@ -1,9 +1,12 @@
 import { Component, onMount, createSignal } from "solid-js"
 import { TopicID, Topic, getTopic, putTopic } from "./Data"
 import styles from "./Reference.module.css"
+import { ButtonWrapper } from "../Button/Wrapper"
+import { getSerialShortcut } from "../../shortcuts"
 
 type P = {
     id: TopicID,
+    serialIndex?: number,
 }
 
 export const Reference: Component<P> = props => {
@@ -19,9 +22,9 @@ export const Reference: Component<P> = props => {
         }
     })
 
-    const handleClick = (event: MouseEvent) => {
-        event.stopPropagation()
-        putTopic(props.id, event.shiftKey)
+    const handleClick = (event?: MouseEvent) => {
+        event?.stopPropagation()
+        putTopic(props.id)
     }
 
     return (
@@ -30,13 +33,12 @@ export const Reference: Component<P> = props => {
                 (
                     <div>Loading...</div>
                 ) : (
-                    <>
+                    <ButtonWrapper shortcut={getSerialShortcut(props.serialIndex)} onInvoke={handleClick}>
                         <img class={styles.Image} src={data?.image} />
                         <div class={styles.Content}>
                             <div class={styles.Label}>{data?.title}</div>
-                            <code>{props.id}</code>
                         </div>
-                    </>
+                    </ButtonWrapper>
                 )}
         </div>
     )

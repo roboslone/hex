@@ -4,7 +4,7 @@ type RawData = {
     title: string
     preamble: JSX.Element
     content: JSX.Element
-    related: Array<keyof typeof Repository>
+    related: TopicID[]
 }
 
 export type Topic = RawData & {
@@ -21,7 +21,8 @@ const Repository: TRepository = {
         preamble: (
             <>
                 <p>
-                    Allows the learning of Light Magic spells of the third and above level. Barbarians cannot learn Light magic or any subskills, instead learning Shatter Light.
+                    Allows the learning of Light Magic spells of the third and above level. 
+                    Barbarians cannot learn Light magic or any subskills, instead learning Shatter Light.
                 </p>
             </>
         ),

@@ -10,7 +10,6 @@
 
     font-size: 14px;
     white-space: nowrap;
-    width: fit-content;
 
     color: var(--color-gold);
     stroke: var(--color-gold);
@@ -25,6 +24,10 @@
     &:active {
         background-color: rgba(255, 255, 255, .1);
     };
+}
+
+.Compact {
+    width: fit-content;
 }
 
 .Shortcut {
