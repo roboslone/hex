@@ -1,18 +1,27 @@
 import { createSignal, JSX } from "solid-js"
+import {Tags} from "./Tags"
 
 type RawData = {
     title: string
     preamble: JSX.Element
     content: JSX.Element
-    related: TopicID[]
+
+    tags: Tags
+    matchRelated: (id: TopicID, data: RawData) => boolean
 }
 
 export type Topic = RawData & {
-    image: string
+    id: TopicID,
+    image: string,
+    related: TopicID[],
 }
 
 type TRepository = {
     [id: string]: RawData
+}
+
+const getCategory = (id: TopicID): string => {
+    return id.split(".").slice(0, -1).join(".")
 }
 
 const Repository: TRepository = {
@@ -36,11 +45,8 @@ const Repository: TRepository = {
                 </ul>
             </>
         ),
-        related: [
-            "core.magic.schools.dark", 
-            "core.magic.schools.conjuration", 
-            "core.magic.schools.destructive",
-        ],
+        tags: new Tags().add("core.affinity", "air"),
+        matchRelated: (_, data) => data.tags.match("core.magic.school", "light"),
     },
     "core.magic.schools.dark": {
         title: "Dark Magic",
@@ -61,11 +67,8 @@ const Repository: TRepository = {
                 </ul>
             </>
         ),
-        related: [
-            "core.magic.schools.light", 
-            "core.magic.schools.conjuration", 
-            "core.magic.schools.destructive",
-        ],
+        tags: new Tags().add("core.affinity", "water"),
+        matchRelated: (_, data) => data.tags.match("core.magic.school", "dark"),
     },
     "core.magic.schools.destructive": {
         title: "Desctructive Magic",
@@ -86,11 +89,8 @@ const Repository: TRepository = {
                 </ul>
             </>
         ),
-        related: [
-            "core.magic.schools.light", 
-            "core.magic.schools.conjuration", 
-            "core.magic.schools.dark",
-        ],
+        tags: new Tags().add("core.affinity", "fire"),
+        matchRelated: (_, data) => data.tags.match("core.magic.school", "destructive"),
     },
     "core.magic.schools.conjuration": {
         title: "Conjuration Magic",
@@ -111,21 +111,49 @@ const Repository: TRepository = {
                 </ul>
             </>
         ),
-        related: [
-            "core.magic.schools.light", 
-            "core.magic.schools.dark", 
-            "core.magic.schools.destructive",
-        ],
+        tags: new Tags().add("core.affinity", "earch"),
+        matchRelated: (_, data) => data.tags.match("core.magic.school", "conjuration"),
     },
+    "core.spells.resurrection": {
+        title: "Resurrection",
+        preamble: (
+            <>
+                <p>
+                    Resurrects a number of creatures equal to the caster's level.
+                    Advanced mastery is required for permanent resurrection.
+                </p>
+            </>
+        ),
+        content: (
+            <>
+                <h1>Effect</h1>
+                <p>
+                    Resurrects a number of creatures equal to the caster's level. 
+                    The spell is permanent, but the creatures will disappear if the hero is defeated in combat.
+                </p>
+            </>
+        ),
+        tags: new Tags().add("core.magic.school", "light", "conjuration"),
+        matchRelated: (id, data) => (
+            id === "core.magic.schools.light" ||
+            id === "core.magic.schools.conjuration" ||
+            data.tags.match("core.magic.school", "light") ||
+            data.tags.match("unit.trait.alive")
+        ),
+    },
+}
+
+for (const [id, data] of Object.entries(Repository)) {
+    data.tags.add("category", getCategory(id))
 }
 
 export type TopicID = keyof typeof Repository & string
 
 export const [stack, setStack] = createSignal<Array<TopicID>>([
-    "core.magic.schools.light",
+    "core.spells.resurrection",
 ])
 
-export const putTopic = async (id?: TopicID, replaceAll = false) => {
+export const putTopic = async (id?: TopicID, replaceAll = true) => {
     console.info("putTopic", id, replaceAll)
 
     if (!id) return []
@@ -150,13 +178,53 @@ export const popTopic = async (id: TopicID) => {
 
 const images = import.meta.glob("/src/assets/docs/*.webp", { as: "url", eager: true })
 
-const getImageURL = async (id: TopicID): Promise<string | undefined> => {
-    const fileName = `/src/assets/docs/${id}.webp`
-    return images[fileName]
+const getImageURL = async (id: TopicID): Promise<string> => {
+    return images[`/src/assets/docs/${id}.webp`]
+}
+
+const getRelated = async (targetID: TopicID, target: RawData): Promise<TopicID[]> => {
+    const related = new Set<TopicID>()
+
+    // Find topics of the same category.
+    const targetCategory = getCategory(targetID)
+    
+    for (const [otherID, other] of Object.entries(Repository)) {
+        console.info("=> getRelated", targetID, otherID)
+        if (getCategory(otherID) === targetCategory) {
+            related.add(otherID)
+            console.info("category match", otherID)
+            continue
+        } else {
+            console.info("category mismatch", targetCategory, getCategory(otherID))
+        }
+
+        if (target.matchRelated(otherID, other)) {
+            related.add(otherID)
+            console.info("tag match", otherID)
+            continue
+        } else {
+            console.info("tag mismatch", targetID, otherID)
+        }
+    }
+
+    related.delete(targetID)
+
+    return Array.from(related).sort()
 }
 
 export const getTopic = async (id: TopicID): Promise<Topic | undefined> => {
-    const raw = Repository[id]
-    if (!raw) return
-    return {...raw, image: await getImageURL(id) ?? ""}
+    const data = Repository[id]
+    if (!data) return
+
+    const [image, related] = await Promise.all([
+        getImageURL(id),
+        getRelated(id, data),
+    ])
+
+    return {
+        ...data,
+        id,
+        image,
+        related,
+    }
 }

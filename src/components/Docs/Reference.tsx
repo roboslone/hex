@@ -33,7 +33,12 @@ export const Reference: Component<P> = props => {
                 (
                     <div>Loading...</div>
                 ) : (
-                    <ButtonWrapper shortcut={getSerialShortcut(props.serialIndex)} onInvoke={handleClick}>
+                    <ButtonWrapper 
+                        title="Show topic"
+                        shortcut={getSerialShortcut(props.serialIndex)} 
+                        onInvoke={handleClick} 
+                        wide
+                    >
                         <img class={styles.Image} src={data?.image} />
                         <div class={styles.Content}>
                             <div class={styles.Label}>{data?.title}</div>

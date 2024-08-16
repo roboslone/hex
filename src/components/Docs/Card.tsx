@@ -6,7 +6,7 @@ import { AiFillCopy } from "solid-icons/ai"
 import classNames from "classnames"
 import styles from "./Card.module.css"
 import { Reference } from "./Reference"
-import { FaSolidBook } from "solid-icons/fa"
+import { FaSolidBook, FaSolidTag } from "solid-icons/fa"
 import { Shortcuts } from "../../shortcuts"
 
 type P = {
@@ -45,24 +45,49 @@ export const Card: Component<P> = props => {
                                 {data?.title || "–"}
                             </div>
 
-                            {props.index === 0 ?
+                            {props.index !== 0 &&
                                 <ButtonWrapper 
-                                    shortcut={Shortcuts.Escape}
-                                    onInvoke={() => popTopic(props.id)}
+                                    title="Close"
+                                    onInvoke={event => { event?.stopPropagation(); popTopic(props.id) }} 
                                     compact
                                 >
                                     <VsChromeClose color="var(--color-gold)" />
                                 </ButtonWrapper>
-                                :
-                                <ButtonWrapper onInvoke={event => { event?.stopPropagation(); popTopic(props.id) }}>
-                                    <VsChromeClose color="var(--color-gold)" />
-                                </ButtonWrapper>
                             }
+
+                            {props.index === 0 && (
+                                <>
+                                    <ButtonWrapper
+                                        title="Full topic"
+                                        shortcut={Shortcuts.ShiftK}
+                                        onInvoke={() => { console.info("DOCS", props.id) }}
+                                    >
+                                        <FaSolidBook />
+                                    </ButtonWrapper>
+                                    <ButtonWrapper
+                                        title="Copy ID to clipboard"
+                                        shortcut={Shortcuts.ShiftI} 
+                                        onInvoke={() => { 
+                                            navigator.clipboard.writeText(props.id)
+                                        }}
+                                    >
+                                        <AiFillCopy />
+                                    </ButtonWrapper>
+                                    <ButtonWrapper 
+                                        title="Close"
+                                        shortcut={Shortcuts.Escape}
+                                        onInvoke={() => popTopic(props.id)}
+                                        compact
+                                    >
+                                        <VsChromeClose color="var(--color-gold)" />
+                                    </ButtonWrapper>
+                                </>
+                            )}
                         </div>
                         <div class={styles.Content}>
                             {data?.preamble}
 
-                            {props.index === 0 && data?.related?.length && data.related.length > 0 && (
+                            {props.index === 0 && data?.related && data.related.length > 0 && (
                                 <>
                                     <h3>Related</h3>
                                     <div style={{display: "flex", gap: "6px", "flex-direction": "column"}}>
@@ -74,28 +99,21 @@ export const Card: Component<P> = props => {
                                     </div>
                                 </>
                             )}
-                        </div>
 
-                        {props.index === 0 && (
-                            <div class={styles.Actions}>
-                                <ButtonWrapper
-                                    shortcut={Shortcuts.ShiftK}
-                                    onInvoke={() => { console.info("DOCS", props.id) }}
-                                >
-                                    <FaSolidBook />
-                                    Docs
-                                </ButtonWrapper>
-                                <ButtonWrapper
-                                    shortcut={Shortcuts.ShiftI} 
-                                    onInvoke={() => { 
-                                        navigator.clipboard.writeText(props.id)
-                                    }}
-                                >
-                                    <AiFillCopy />
-                                    Copy ID
-                                </ButtonWrapper>
-                            </div>
-                        )}
+                            {data?.tags &&
+                                <>
+                                    <h3>Tags</h3>
+                                    <div style={{display: "flex", "flex-direction": "column", "gap": "6px"}}>
+                                        {Array.from(data.tags.pairs()).map(([k, v]) => (
+                                            <ButtonWrapper title="Show related" onInvoke={() => {}} wide>
+                                                <FaSolidTag />
+                                                <code>{k}:{v}</code>
+                                            </ButtonWrapper>
+                                        ))}
+                                    </div>
+                                </>
+                            }
+                        </div>
                     </>
                 )
             }

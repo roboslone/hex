@@ -5,8 +5,10 @@ import classNames from "classnames"
 
 type P = {
     onInvoke: (event?: MouseEvent) => void,
+    title: string,
     shortcut?: KeyboardShortcut,
     compact?: boolean,
+    wide?: boolean,
 }
 
 export const ButtonWrapper: ParentComponent<P> = props => {
@@ -32,11 +34,12 @@ export const ButtonWrapper: ParentComponent<P> = props => {
         styles.ButtonWrapper,
         {
             [styles.Compact]: props.compact,
+            [styles.Wide]: props.wide,
         },
     )
 
     return (
-        <div class={className} onClick={props.onInvoke}>
+        <div class={className} onClick={props.onInvoke} title={props.title}>
             {props.children}
             {props.shortcut && (
                 <div class={styles.Shortcut}>{props.shortcut.label}</div>
