@@ -1,0 +1,80 @@
+.Card {
+    background: var(--color-background-2);
+    border: 1px solid var(--color-border-2);
+    border-radius: 3px;
+    cursor: pointer;
+
+    &:hover {
+        opacity: 1;
+    }
+}
+
+.CardSecondary {
+    opacity: .5;
+}
+
+.Button {
+    padding: 6px;
+    cursor: pointer;
+    background-color: transparent;
+    border-radius: 3px;
+    transition: background-color ease-in .1s;
+
+    &:hover {
+        background-color: rgba(255, 255, 255, .1);
+    }
+}
+
+.Title {
+    color: var(--color-gold);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 500;
+    font-size: 18px;
+    margin-right: auto;
+}
+
+.Content {
+    padding: 12px;
+    font-size: 14px;
+    line-height: 20px;
+    color: var(--color-foreground-secondary);
+
+    h1 {
+        font-size: 18px;
+        font-weight: 500;
+        color: var(--color-gold);
+    }
+
+    h3 {
+        font-weight: 500;
+        color: var(--color-gold);
+    }
+
+    p {
+        margin: 0;
+    }
+}
+
+.Cover {
+    display: flex;
+    gap: 6px;
+    padding: 6px;
+    align-items: center;
+}
+
+.Image {
+    height: 64px;
+    width: 64px;
+    border-radius: 3px;
+    margin-right: 6px;
+}
+
+.Actions {
+    padding: 12px;
+    padding-top: 0;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
