@@ -1,6 +1,6 @@
 import { ButtonWrapper } from "../Button/Wrapper"
 import { type Component, createSignal, For, onMount } from "solid-js"
-import { TopicID, getTopic, putTopic, popTopic, Topic } from "./Repository"
+import { TopicID, getTopic, putTopic, popTopic, Topic } from "./Data"
 import { VsChromeClose } from "solid-icons/vs"
 import { AiFillCopy } from "solid-icons/ai"
 import classNames from "classnames"

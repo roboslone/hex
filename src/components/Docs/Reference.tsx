@@ -1,5 +1,5 @@
 import { Component, onMount, createSignal } from "solid-js"
-import { TopicID, Topic, getTopic, putTopic } from "./Repository"
+import { TopicID, Topic, getTopic, putTopic } from "./Data"
 import styles from "./Reference.module.css"
 
 type P = {
