@@ -153,6 +153,8 @@ export const [stack, setStack] = createSignal<Array<TopicID>>([
     "core.spells.resurrection",
 ])
 
+export const [shortTopicMode, setShortTopicMode] = createSignal(false)
+
 export const putTopic = async (id?: TopicID, replaceAll = true) => {
     console.info("putTopic", id, replaceAll)
 
