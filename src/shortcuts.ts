@@ -26,7 +26,7 @@ export const Shortcuts = {
 }
 
 export const getSerialShortcut = (index?: number): KeyboardShortcut => {
-    if (index === undefined) {
+    if (index === undefined || index > 8) {
         return Noop
     }
 

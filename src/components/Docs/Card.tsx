@@ -1,13 +1,12 @@
 import { ButtonWrapper } from "../Button/Wrapper"
-import { type Component, createSignal, For, onMount, Show } from "solid-js"
-import { TopicID, getTopic, putTopic, popTopic, Topic, shortTopicMode, setShortTopicMode } from "./Data"
+import { type Component, createSignal, For, onMount } from "solid-js"
+import { TopicID, getTopic, putTopic, popTopic, Topic } from "./Data"
 import { VsChromeClose } from "solid-icons/vs"
 import { AiFillCopy } from "solid-icons/ai"
 import classNames from "classnames"
 import styles from "./Card.module.css"
 import { Reference } from "./Reference"
 import { FaSolidHashtag } from "solid-icons/fa"
-import { IoInvertModeOutline } from "solid-icons/io"
 import { Shortcuts } from "../../shortcuts"
 
 type P = {
@@ -18,11 +17,15 @@ type P = {
 export const Card: Component<P> = props => {
     const [loading, setLoading] = createSignal(false)
 
+    let ref: HTMLDivElement | undefined
     let data: Topic | undefined
+    let imageURL: string | undefined
     onMount(async () => {
         setLoading(true)
         try {
             data = await getTopic(props.id)
+            imageURL = data?.image
+            ref?.style.setProperty("background-image", `url(${imageURL})`)
         } finally {
             setLoading(false)
         }
@@ -34,18 +37,17 @@ export const Card: Component<P> = props => {
     }
 
     return (
-        <div class={classNames(styles.Card, {[styles.CardSecondary]: props.index !== 0})} onClick={handleClick}>
+        <div 
+            ref={ref}
+            class={classNames(styles.Card, {[styles.CardSecondary]: props.index !== 0})}
+            onClick={handleClick}
+        >
             {loading() ?
                 (
                     <div>Loading...</div>
                 ) : (
                     <>
                         <div class={styles.Cover}>
-                            <img src={data?.image} class={styles.Image} />
-                            <div class={styles.Title}>
-                                {data?.title || "–"}
-                            </div>
-
                             {props.index !== 0 &&
                                 <ButtonWrapper 
                                     title="Close"
@@ -59,13 +61,6 @@ export const Card: Component<P> = props => {
                             {props.index === 0 && (
                                 <>
                                     <ButtonWrapper
-                                        title="Switch mode"
-                                        shortcut={Shortcuts.ShiftK}
-                                        onInvoke={() => { setShortTopicMode(v => !v) }}
-                                    >
-                                        <IoInvertModeOutline />
-                                    </ButtonWrapper>
-                                    <ButtonWrapper
                                         title="Copy ID to clipboard"
                                         shortcut={Shortcuts.ShiftI} 
                                         onInvoke={() => { 
@@ -73,7 +68,9 @@ export const Card: Component<P> = props => {
                                         }}
                                     >
                                         <AiFillCopy />
+                                        Copy ID
                                     </ButtonWrapper>
+                                    <div style={{"margin-right":"auto"}} />
                                     <ButtonWrapper 
                                         title="Close"
                                         shortcut={Shortcuts.Escape}
@@ -86,41 +83,41 @@ export const Card: Component<P> = props => {
                             )}
                         </div>
                         <div class={styles.Content}>
-                            {data?.preamble}
+                            <div class={styles.PosterContainer}>
+                                <h1>{data?.title}</h1>
+                                <img src={data?.image} class={styles.Poster} />
+                            </div>
+                                
+                            {data?.content}
 
-                            <Show when={shortTopicMode()}>
-                                {data?.content}
-                            </Show>
+                            {props.index === 0 && data?.tags &&
+                                <>
+                                    <h3>Tags</h3>
+                                    <div style={{display: "flex", "flex-direction": "column", "gap": "6px"}}>
+                                        {Array.from(data.tags.pairs()).map(([k, v]) => (
+                                            <ButtonWrapper title="Show related" onInvoke={() => {}} wide>
+                                                <FaSolidHashtag />
+                                                <code>{k}:{v}</code>
+                                            </ButtonWrapper>
+                                        ))}
+                                    </div>
+                                </>
+                            }
 
-                            <Show when={!shortTopicMode()}>
-                                {props.index === 0 && data?.related && data.related.length > 0 && (
-                                    <>
-                                        <h3>Related</h3>
-                                        <div style={{display: "flex", gap: "6px", "flex-direction": "column"}}>
-                                            <For each={data?.related}>
-                                                {(id, index) => (
-                                                    <Reference id={id} serialIndex={index()} />
-                                                )}
-                                            </For>
-                                        </div>
-                                    </>
-                                )}
+                            {props.index === 0 && data?.related && data.related.length > 0 && (
+                                <>
+                                    <h3>Related</h3>
+                                    <div style={{display: "flex", gap: "6px", "flex-direction": "column"}}>
+                                        <For each={data?.related}>
+                                            {(id, index) => (
+                                                <Reference id={id} serialIndex={index()} />
+                                            )}
+                                        </For>
+                                    </div>
+                                </>
+                            )}
 
-                                {data?.tags &&
-                                    <>
-                                        <h3>Tags</h3>
-                                        <div style={{display: "flex", "flex-direction": "column", "gap": "6px"}}>
-                                            {Array.from(data.tags.pairs()).map(([k, v]) => (
-                                                <ButtonWrapper title="Show related" onInvoke={() => {}} wide>
-                                                    <FaSolidHashtag />
-                                                    <code>{k}:{v}</code>
-                                                </ButtonWrapper>
-                                            ))}
-                                        </div>
-                                    </>
-                                }
-                            </Show>
-
+                            <div style={{"margin-bottom": "32px"}} />
                         </div>
                     </>
                 )
